@@ -1,0 +1,152 @@
+---
+title: "MBA6693 Assignment 1"
+author: "Xinkai Zhou, 3326722"
+date: "Due 11/7/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The file indu.csv contains historical monthly returns on the Fama French 49 industry portfolios for the U.S. market over a 72 month period. The file 5factors.csv contains historical monthly returns on the set of factor returns for the U.S. market over the same 72 month period, as well as the risk free rate.
+The factors in the data set are:
+
+• RF: The risk free rate of return for that month
+
+• Mkt: The market return
+
+• Mkt-RF: The market excess return for that month
+
+• SMB: The size factor return (the return of a portfolio that is long smaller stocks and short larger stocks)
+
+• HML: The value factor return (the return of a portfolio that is long cheaper value stocks and short more expensive stocks)
+
+• RMW: the profitability factor ( the return of a portfolio that is long robust operating profitability stock and short weak operating profitability stocks)
+
+• CMA: the investment factor (the return of a portfolio that is long conservative investment stocks and short the aggressive investment stocks).
+
+
+$~$
+
+$~$
+
+Before start this assignment, we need to load the required data and packages:
+
+```{r, message=FALSE}
+setwd("D:/My Documents/GitHub/MBA6693")  #set working diretory
+rm(list=ls()) #clear all variables out of the environment
+
+fac <- read.csv("5factors.csv", header=TRUE) #load Fama French data
+indu <- read.csv("indu.csv", header=TRUE) #load industry portfolios data
+
+indu = indu - fac[,2] #compute the excess return
+```
+
+
+
+
+# Model 1
+
+Transform the industry returns into excess returns and then regress each industry portfolio’s return on the market excess return Mkt - RF by using single linear regression model:
+$$r_I = \alpha + \beta (r_m - r_f) + \epsilon$$
+
+In this case I will only analizing the Business Service portfolio returns. Which is the 35th column. 
+
+```{r}
+colnames(indu)[35] #show Business Service column is the 35th column
+colnames(fac) #show factors column names
+```
+
+
+```{r}
+m1 <- lm(indu[,35] ~ fac[,4])
+summary(m1)
+plot(m1)
+
+
+
+```
+
+By using the market excess return, , the portfolio return is produced by:
+
+$$r_I=-0.05473+1.07607(r_m - r_f)+\epsilon$$
+
+Which means the portfolio returns increase by 1.08 if market excess return increase by 1. 
+
+The market excess return explains 72.26% of the variability in the portfolio returns.
+
+
+$~$
+
+
+
+
+
+
+# Model 2
+
+Next perform the same analysis as in before, but instead regress the industry portfolio excess returns on
+the three Fama French factors (Mkt-RF, SMB and HML) in a multivariate model.
+
+```{r}
+m2 <- lm(indu[,35] ~ fac[,4]+fac[,5]+fac[,6])
+summary(m2)
+plot(m2)
+```
+
+By using the market excess return, the size factor return and the value factor return, the portfolio return is produced by:
+
+$$r_I=0.15764+0.93614(r_m - r_f)+0.66108SMB+0.04137HML+\epsilon$$
+
+All three factors show positive correlation with portfolio returns, the portfolio rtn increases by 0.94, 0.66, 0.04 if market excess return, size factor and value factor increases by 1.
+
+```{r}
+summary(m2)$adj.r.squared
+```
+
+The market excess return,the size factor return and the value factor return explains 87.398% of the variability in the portfolio returns.
+
+$~$
+
+
+
+
+# Model 3
+
+Perform the same analysis as in before, but instead regress the industry portfolio excess returns on the five Fama French factors (Mkt.RF, SMB, HML, RMW and CMA) in a multivariate model. 
+
+```{r}
+m3 <- lm(indu[,35] ~ fac[,4]+fac[,5]+fac[,6]+fac[,7]+fac[,8])
+summary(m3)
+plot(m3)
+```
+
+By using all Fama French factors, the portfolio return is produced by:
+
+$$r_I=0.172854+0.941237(r_m - r_f)+0.612116SMB+0.005922HML-0.180305RMW+0.112817CMA+\epsilon$$
+
+Only the profitability factor shows negative correlation with the portfolio return, the portfolio returns decreases by 0.18 if the profitability factor increases by 1. the rest factors are positively correlated with the portfolio return,it increases by 0.94, 0.61, 0.01 and 0.11 if market excess return, size factor, value factor and investment factor increases by 1.
+
+```{r}
+summary(m3)$adj.r.squared
+```
+
+All 5 factors explains 87.401% of the variability in the portfolio returns.
+
+$~$
+
+
+# Conclusion
+
+By adding more factors, the R-Squared slightly increases, we clearly can say 5-factor model is better than 3- and 1-factor.
+
+Compare all three models the third's residuals vs fitted plot is better, it better fitted the data. The normal QQ plot also shows the third are better fit as normal. The size of the standardized residuals is more consistent in the third model.
+
+I would choose 5-factor models to explain the cross-section of excess returns of industry portfolios, the R-sq is slightly better than 3-factor model. 
+
+
+
+
+
